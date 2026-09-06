@@ -222,26 +222,24 @@ For each match, Gemini generates a brief explanation:
 
 ---
 
-## Deployment
+## Deployment (Vercel)
 
-### Frontend (Vercel)
-```bash
-cd frontend
-npm run build
-# Deploy the dist/ folder to Vercel
-```
+Both the React frontend and FastAPI backend are hosted on **Vercel** under a single serverless deployment.
 
-### Backend (Render)
-1. Push code to GitHub
-2. Create new Web Service on [Render.com](https://render.com)
-3. Point to `/backend` directory
-4. Set environment variable: `GEMINI_API_KEY`
-5. Deploy
+### 1. Backend Configuration
+The backend uses Vercel's Python runtime via `backend/vercel.json`:
+- **Root Directory:** `backend`
+- **Environment Variable:** Set `GEMINI_API_KEY` in your Vercel Project Settings.
 
-Update `frontend/src/App.jsx` with the deployed backend URL:
+### 2. Frontend Configuration
+- **Root Directory:** `frontend`
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+
+### 3. API Base URL
+In `frontend/src/App.jsx`, update the API endpoint to point to your live Vercel backend deployment:
 ```javascript
-const API_BASE = 'https://giveback-api.render.com/api';
-```
+const API_BASE = '[https://give-back-five.vercel.app/api](https://give-back-five.vercel.app/api)';
 
 ---
 
