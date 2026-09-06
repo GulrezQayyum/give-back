@@ -88,7 +88,7 @@ Google Gemini AI
 
 ### Deployment
 - **Vercel** (Frontend)
-- **Render / Railway** (Backend)
+- **Render** (Backend)
 - **Git / GitHub** (Version control)
 
 ---
