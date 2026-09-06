@@ -6,8 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from google import genai
 from google.genai import types
+from sentence_transformers import SentenceTransformer
+import time
+
 
 app = FastAPI(title="GiveBack API")
+
+# Load model once at startup
+embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Enable CORS for React frontend
 app.add_middleware(
@@ -69,22 +75,35 @@ def extract_structured_info(description: str, entity_type: str) -> StructuredInt
     - skills (list of relevant technologies, topics, or resources mentioned)
     - availability_or_urgency (if offer, describe availability; if request, describe urgency or timeline)
     """
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=StructuredIntent,
-        ),
+    
+    # Try preferred model, fallback if 503 / high demand occurs
+    models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash"]
+    
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=StructuredIntent,
+                ),
+            )
+            return StructuredIntent.model_validate_json(response.text)
+        except Exception as e:
+            print(f"Model {model_name} failed ({e}), attempting fallback...")
+            time.sleep(1)
+
+    # Simple manual fallback if API fails completely so app doesn't crash
+    return StructuredIntent(
+        category="general",
+        skills=[entity_type],
+        availability_or_urgency="flexible"
     )
-    return StructuredIntent.model_validate_json(response.text)
 
 def get_embedding(text: str) -> List[float]:
-    response = client.models.embed_content(
-        model="text-embedding-004",
-        contents=text,
-    )
-    return response.embedding.values
+    # Local semantic vector representation (384 dimensions)
+    return embedder.encode(text).tolist()
 
 def generate_explanation(source_desc: str, target_desc: str, score: int) -> str:
     prompt = f"""
@@ -93,11 +112,19 @@ def generate_explanation(source_desc: str, target_desc: str, score: int) -> str:
     Description B: "{target_desc}"
     Highlight specific overlapping skills, resources, or timing.
     """
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-    )
-    return response.text.strip()
+    
+    models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash"]
+    for model_name in models_to_try:
+        try:
+            response = client.models.generate_content(
+                model=model_name,
+                contents=prompt,
+            )
+            return response.text.strip()
+        except Exception:
+            time.sleep(1)
+
+    return f"This match has a {score}% semantic capability and skill similarity."
 
 # --- Endpoints ---
 @app.post("/api/offers")
