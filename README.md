@@ -244,37 +244,30 @@ const API_BASE = '[https://give-back-five.vercel.app/api](https://give-back-five
 ---
 
 ## Environment Variables
-
+ 
 Create a `.env` file in the `backend/` directory:
-
+ 
 ```
 GEMINI_API_KEY=your-google-gemini-api-key-here
 ```
-
+ 
 **Never commit `.env` to version control.**
-
+ 
 ---
-
+ 
 ## Contributing
-
+ 
 Contributions are welcome! Feel free to:
 - Report bugs via GitHub Issues
 - Submit pull requests with improvements
 - Suggest new features
-
 ---
-
-## License
-
-This project is open source and available under the MIT License.
-
----
-
+ 
 ## Built For
-
+ 
 **DEV Challenge: Generosity Edition**  
 Showcasing how AI can enable non-monetary community giving.
-
+ 
 ---
 
 **Made with love by Gulrez**  
