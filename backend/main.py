@@ -1,5 +1,6 @@
 import os
 import math
+import time
 from typing import List, Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,13 +8,8 @@ from pydantic import BaseModel
 from google import genai
 from google.genai import types
 from sentence_transformers import SentenceTransformer
-import time
-
 
 app = FastAPI(title="GiveBack API")
-
-# Load model once at startup
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Enable CORS for React frontend
 app.add_middleware(
@@ -26,10 +22,10 @@ app.add_middleware(
 
 # Initialize Google GenAI client
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if not GEMINI_API_KEY:
-    print("Warning: GEMINI_API_KEY environment variable not set.")
-
 client = genai.Client(api_key=GEMINI_API_KEY) if GEMINI_API_KEY else None
+
+# Local embedding model fallback
+embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 # In-memory storage for MVP
 offers_db = []
@@ -44,11 +40,13 @@ class StructuredIntent(BaseModel):
 
 class EntityInput(BaseModel):
     name: str
+    contact: str
     description: str
 
 class MatchResult(BaseModel):
     id: int
     name: str
+    contact: str
     description: str
     category: str
     skills: List[str]
@@ -76,9 +74,7 @@ def extract_structured_info(description: str, entity_type: str) -> StructuredInt
     - availability_or_urgency (if offer, describe availability; if request, describe urgency or timeline)
     """
     
-    # Try preferred model, fallback if 503 / high demand occurs
     models_to_try = ["gemini-2.5-flash", "gemini-1.5-flash"]
-    
     for model_name in models_to_try:
         try:
             response = client.models.generate_content(
@@ -90,11 +86,9 @@ def extract_structured_info(description: str, entity_type: str) -> StructuredInt
                 ),
             )
             return StructuredIntent.model_validate_json(response.text)
-        except Exception as e:
-            print(f"Model {model_name} failed ({e}), attempting fallback...")
+        except Exception:
             time.sleep(1)
 
-    # Simple manual fallback if API fails completely so app doesn't crash
     return StructuredIntent(
         category="general",
         skills=[entity_type],
@@ -102,7 +96,6 @@ def extract_structured_info(description: str, entity_type: str) -> StructuredInt
     )
 
 def get_embedding(text: str) -> List[float]:
-    # Local semantic vector representation (384 dimensions)
     return embedder.encode(text).tolist()
 
 def generate_explanation(source_desc: str, target_desc: str, score: int) -> str:
@@ -129,9 +122,6 @@ def generate_explanation(source_desc: str, target_desc: str, score: int) -> str:
 # --- Endpoints ---
 @app.post("/api/offers")
 def create_offer(payload: EntityInput):
-    if not client:
-        raise HTTPException(status_code=500, detail="Gemini API Key missing")
-    
     intent = extract_structured_info(payload.description, "offer")
     embedding = get_embedding(f"{payload.description} {' '.join(intent.skills)}")
     
@@ -141,6 +131,7 @@ def create_offer(payload: EntityInput):
     record = {
         "id": item_id,
         "name": payload.name,
+        "contact": payload.contact,
         "description": payload.description,
         "category": intent.category,
         "skills": intent.skills,
@@ -149,16 +140,16 @@ def create_offer(payload: EntityInput):
     }
     offers_db.append(record)
 
-    # Find matches against existing requests
     matches = []
     for req in requests_db:
         sim = cosine_similarity(embedding, req["embedding"])
         score = int(round(sim * 100))
-        if score > 30:  # Threshold for relevance
+        if score > 20:
             explanation = generate_explanation(payload.description, req["description"], score)
             matches.append(MatchResult(
                 id=req["id"],
                 name=req["name"],
+                contact=req.get("contact", "N/A"),
                 description=req["description"],
                 category=req["category"],
                 skills=req["skills"],
@@ -172,9 +163,6 @@ def create_offer(payload: EntityInput):
 
 @app.post("/api/requests")
 def create_request(payload: EntityInput):
-    if not client:
-        raise HTTPException(status_code=500, detail="Gemini API Key missing")
-    
     intent = extract_structured_info(payload.description, "request")
     embedding = get_embedding(f"{payload.description} {' '.join(intent.skills)}")
     
@@ -184,6 +172,7 @@ def create_request(payload: EntityInput):
     record = {
         "id": item_id,
         "name": payload.name,
+        "contact": payload.contact,
         "description": payload.description,
         "category": intent.category,
         "skills": intent.skills,
@@ -192,16 +181,16 @@ def create_request(payload: EntityInput):
     }
     requests_db.append(record)
 
-    # Find matches against existing offers
     matches = []
     for offer in offers_db:
         sim = cosine_similarity(embedding, offer["embedding"])
         score = int(round(sim * 100))
-        if score > 30:
+        if score > 20:
             explanation = generate_explanation(payload.description, offer["description"], score)
             matches.append(MatchResult(
                 id=offer["id"],
                 name=offer["name"],
+                contact=offer.get("contact", "N/A"),
                 description=offer["description"],
                 category=offer["category"],
                 skills=offer["skills"],

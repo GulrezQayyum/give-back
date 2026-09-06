@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Heart, Sparkles, User, ArrowRight, CheckCircle2, Search, RefreshCw } from 'lucide-react';
+import { Heart, Sparkles, User, ArrowRight, CheckCircle2, Search, RefreshCw, Mail } from 'lucide-react';
 
 const API_BASE = 'http://localhost:8000/api';
 
 export default function App() {
-  const [screen, setScreen] = useState('landing'); // landing, offer, need, matches
+  const [screen, setScreen] = useState('landing'); // landing, form, matches
   const [mode, setMode] = useState('offer'); // offer or need
   const [name, setName] = useState('');
+  const [contact, setContact] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [matches, setMatches] = useState([]);
@@ -14,7 +15,7 @@ export default function App() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !description) return;
+    if (!name || !description || !contact) return;
     setLoading(true);
 
     const endpoint = mode === 'offer' ? `${API_BASE}/offers` : `${API_BASE}/requests`;
@@ -22,7 +23,7 @@ export default function App() {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description }),
+        body: JSON.stringify({ name, contact, description }),
       });
       const data = await res.json();
       setCreatedItem(data.data);
@@ -104,6 +105,18 @@ export default function App() {
                   placeholder="e.g. Alex Chen"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Contact Details</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Email, Telegram handle, or GitHub profile"
+                  value={contact}
+                  onChange={(e) => setContact(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 outline-none"
                 />
               </div>
@@ -217,6 +230,28 @@ export default function App() {
                       <p className="text-xs text-slate-600 leading-relaxed">
                         {match.explanation}
                       </p>
+                    </div>
+
+                    {/* Connect Button Section */}
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
+                      <span className="text-xs text-slate-500">
+                        Interested in collaborating?
+                      </span>
+                      
+                      <a
+                        href={
+                          match.contact.includes('@') 
+                            ? `mailto:${match.contact}?subject=GiveBack Match: ${encodeURIComponent(match.description)}` 
+                            : match.contact.startsWith('http') 
+                              ? match.contact 
+                              : `https://github.com/${match.contact.replace('@', '')}`
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition flex items-center gap-1.5 shadow-sm"
+                      >
+                        <Mail size={14} /> Connect ({match.contact})
+                      </a>
                     </div>
                   </div>
                 ))}
