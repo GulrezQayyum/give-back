@@ -192,7 +192,6 @@ give-back/
 │   │   ├── main.jsx         # React entry point
 │   │   └── index.css        # Tailwind imports
 │   ├── index.html           # HTML template
-│   ├── vite.config.js       # Vite config
 │   ├── tailwind.config.js   # Tailwind config
 │   ├── postcss.config.js    # PostCSS config
 │   └── package.json         # Node dependencies
