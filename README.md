@@ -239,35 +239,37 @@ The backend uses Vercel's Python runtime via `backend/vercel.json`:
 ### 3. API Base URL
 In `frontend/src/App.jsx`, update the API endpoint to point to your live Vercel backend deployment:
 ```javascript
-const API_BASE = '[https://give-back-five.vercel.app/api](https://give-back-five.vercel.app/api)';
+const API_BASE = 'https://give-back-five.vercel.app/api';
+```
 
 ---
 
 ## Environment Variables
- 
+
 Create a `.env` file in the `backend/` directory:
- 
+
 ```
 GEMINI_API_KEY=your-google-gemini-api-key-here
 ```
- 
+
 **Never commit `.env` to version control.**
- 
+
 ---
- 
+
 ## Contributing
- 
+
 Contributions are welcome! Feel free to:
 - Report bugs via GitHub Issues
 - Submit pull requests with improvements
 - Suggest new features
+
 ---
- 
+
 ## Built For
- 
+
 **DEV Challenge: Generosity Edition**  
 Showcasing how AI can enable non-monetary community giving.
- 
+
 ---
 
 **Made with love by Gulrez**  
