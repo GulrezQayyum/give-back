@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { Heart, Sparkles, User, ArrowRight, CheckCircle2, Search, RefreshCw, Mail } from 'lucide-react';
+import { Heart, Sparkles, ArrowRight, Search, RefreshCw, Mail, CheckCircle2, User, HelpCircle, Share2, Copy } from 'lucide-react';
 
 const API_BASE = 'http://localhost:8000/api';
 
 export default function App() {
-  const [screen, setScreen] = useState('landing'); // landing, form, matches
-  const [mode, setMode] = useState('offer'); // offer or need
+  const [screen, setScreen] = useState('landing');
+  const [mode, setMode] = useState('offer');
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [matches, setMatches] = useState([]);
   const [createdItem, setCreatedItem] = useState(null);
+  const [copiedId, setCopiedId] = useState(null);
+
+  const copyToClipboard = (text, id) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,46 +45,57 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-slate-100 font-sans flex flex-col">
       {/* Header */}
-      <header className="border-b bg-white border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="border-b border-slate-800 bg-slate-950/60 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div 
-            className="flex items-center space-x-2 cursor-pointer"
+            className="flex items-center space-x-3 cursor-pointer group"
             onClick={() => setScreen('landing')}
           >
-            <div className="bg-indigo-600 p-2 rounded-lg text-white">
-              <Heart size={20} />
+            <div className="bg-gradient-to-tr from-indigo-500 to-rose-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition">
+              <Heart className="w-5 h-5 text-white fill-white" />
             </div>
-            <span className="font-bold text-xl tracking-tight text-slate-900">GiveBack</span>
+            <span className="font-extrabold text-2xl tracking-tight text-white">Give<span className="text-indigo-400">Back</span></span>
           </div>
-          <span className="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-medium border border-indigo-100 flex items-center gap-1">
-            <Sparkles size={14} /> Powered by Google AI
-          </span>
+
+          <div className="flex items-center gap-3">
+            <span className="text-xs bg-indigo-500/10 text-indigo-300 px-3 py-1.5 rounded-full font-medium border border-indigo-500/20 flex items-center gap-1.5 shadow-inner">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" /> Powered by Google AI
+            </span>
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-12">
+      {/* Main Container */}
+      <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-12 flex flex-col justify-center">
+        
+        {/* Landing View */}
         {screen === 'landing' && (
-          <div className="text-center py-12">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
-              Give what you have.<br />Find what you need.
+          <div className="text-center py-12 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/80 border border-slate-700 text-indigo-300 text-xs font-semibold uppercase tracking-wider mb-8">
+              <Sparkles size={14} /> AI-Powered Generosity Platform
+            </div>
+
+            <h1 className="text-5xl sm:text-6xl font-black text-white tracking-tight leading-tight">
+              Give what you have.<br />
+              <span className="bg-gradient-to-r from-indigo-400 via-purple-300 to-rose-400 bg-clip-text text-transparent">Find what you need.</span>
             </h1>
-            <p className="mt-4 text-lg text-slate-600 max-w-xl mx-auto">
-              Generosity isn't limited to money. GiveBack uses Google AI to semantically connect skills, time, and resources with people who need help.
+
+            <p className="mt-6 text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
+              Generosity isn't limited to money. Share your skills, time, or experience, or find community members ready to help solve your challenges.
             </p>
 
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <button
                 onClick={() => { setMode('offer'); setScreen('form'); }}
-                className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm transition flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/25 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
                 I can help someone <ArrowRight size={18} />
               </button>
               <button
                 onClick={() => { setMode('need'); setScreen('form'); }}
-                className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-100 text-slate-700 font-semibold rounded-xl border border-slate-300 transition flex items-center justify-center gap-2"
+                className="w-full sm:w-auto px-8 py-4 bg-slate-800/80 hover:bg-slate-800 text-slate-200 font-bold rounded-2xl border border-slate-700 hover:border-slate-600 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
                 I need help <Search size={18} />
               </button>
@@ -85,44 +103,50 @@ export default function App() {
           </div>
         )}
 
+        {/* Input Form View */}
         {screen === 'form' && (
-          <div className="max-w-lg mx-auto bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">
-              {mode === 'offer' ? 'Offer Support' : 'Request Support'}
-            </h2>
-            <p className="text-sm text-slate-500 mb-6">
+          <div className="max-w-xl mx-auto w-full bg-slate-900/90 border border-slate-800 p-8 rounded-3xl shadow-2xl backdrop-blur-xl">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">
+                {mode === 'offer' ? <Share2 size={22} /> : <HelpCircle size={22} />}
+              </div>
+              <h2 className="text-2xl font-bold text-white">
+                {mode === 'offer' ? 'Offer Support' : 'Request Support'}
+              </h2>
+            </div>
+            <p className="text-sm text-slate-400 mb-8 pl-1">
               {mode === 'offer' 
                 ? 'Describe what skills, resources, or time you can share.'
                 : 'Describe what you are stuck with or what help you are looking for.'}
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Your Name</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Your Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Alex Chen"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 outline-none"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">Contact Details</label>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Contact Details</label>
                 <input
                   type="text"
                   required
                   placeholder="Email, Telegram handle, or GitHub profile"
                   value={contact}
                   onChange={(e) => setContact(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 outline-none"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase mb-1">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
                   Description (Natural Language)
                 </label>
                 <textarea
@@ -135,19 +159,19 @@ export default function App() {
                   }
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-slate-900 outline-none"
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-sm leading-relaxed"
                 />
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow transition flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/20 transition flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
               >
                 {loading ? (
                   <>
                     <RefreshCw className="animate-spin" size={18} />
-                    Analyzing with Gemini...
+                    Analyzing Intent with Gemini...
                   </>
                 ) : mode === 'offer' ? (
                   'Find someone I can help'
@@ -159,106 +183,130 @@ export default function App() {
           </div>
         )}
 
+        {/* Matches Results View */}
         {screen === 'matches' && (
-          <div>
-            <div className="mb-8 flex items-center justify-between">
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">Recommended Matches</h2>
-                <p className="text-sm text-slate-500">
-                  Matches found based on semantic embedding similarity and Gemini intent extraction.
+                <h2 className="text-3xl font-extrabold text-white">Recommended Matches</h2>
+                <p className="text-sm text-slate-400 mt-1">
+                  Semantic embeddings matched your entry with compatible community members.
                 </p>
               </div>
               <button
                 onClick={() => { setDescription(''); setScreen('form'); }}
-                className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold"
+                className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 font-semibold rounded-xl border border-slate-700 text-xs transition self-start sm:self-auto"
               >
                 + New {mode === 'offer' ? 'Offer' : 'Request'}
               </button>
             </div>
 
-            {/* Created Summary */}
+            {/* Created Item Banner */}
             {createdItem && (
-              <div className="bg-indigo-50/50 border border-indigo-100 p-4 rounded-xl mb-6 flex flex-wrap gap-2 items-center text-sm">
-                <span className="font-semibold text-indigo-900">Your Entry:</span>
-                <span className="text-slate-700">"{createdItem.description}"</span>
-                <span className="ml-auto bg-indigo-100 text-indigo-800 font-medium px-2.5 py-0.5 rounded-full text-xs uppercase">
+              <div className="bg-indigo-950/40 border border-indigo-500/30 p-5 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-sm">
+                <div className="flex items-center gap-3">
+                  <span className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 font-bold text-xs uppercase">Your Post</span>
+                  <span className="text-slate-200">"{createdItem.description}"</span>
+                </div>
+                <span className="text-xs bg-slate-900 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/20 font-medium self-start sm:self-auto">
                   {createdItem.category}
                 </span>
               </div>
             )}
 
+            {/* Match Cards List */}
             {matches.length === 0 ? (
-              <div className="bg-white border border-slate-200 rounded-xl p-12 text-center">
-                <p className="text-slate-500 font-medium">No matches found above the similarity threshold yet.</p>
-                <p className="text-xs text-slate-400 mt-1">Try posting another item to trigger reciprocal matching!</p>
+              <div className="bg-slate-900/60 border border-slate-800 rounded-3xl p-16 text-center">
+                <p className="text-slate-400 font-medium text-base">No active matches above the relevance threshold yet.</p>
+                <p className="text-xs text-slate-500 mt-2">Try adding complementary requests or offers to trigger matching!</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="grid gap-5">
                 {matches.map((match) => (
-                  <div key={match.id} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                    <div className="flex items-start justify-between">
+                  <div key={match.id} className="bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-6 shadow-xl transition-all">
+                    
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold">
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-extrabold text-base shadow-md">
                           {match.name.charAt(0)}
                         </div>
                         <div>
-                          <h3 className="font-bold text-slate-900">{match.name}</h3>
-                          <p className="text-xs text-slate-500">{match.availability_or_urgency}</p>
+                          <h3 className="font-bold text-lg text-white">{match.name}</h3>
+                          <p className="text-xs text-slate-400">{match.availability_or_urgency}</p>
                         </div>
                       </div>
-                      <div className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold border border-emerald-100">
+
+                      <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1 rounded-full text-xs font-extrabold">
                         {match.match_percentage}% Match
                       </div>
                     </div>
 
-                    <p className="mt-4 text-slate-700 text-sm">{match.description}</p>
+                    {/* Description */}
+                    <p className="mt-4 text-slate-300 text-sm leading-relaxed">{match.description}</p>
 
-                    <div className="mt-3 flex flex-wrap gap-1.5">
+                    {/* Skill Tags */}
+                    <div className="mt-4 flex flex-wrap gap-2">
                       {match.skills.map((skill, i) => (
-                        <span key={i} className="bg-slate-100 text-slate-600 px-2.5 py-0.5 rounded text-xs">
+                        <span key={i} className="bg-slate-950 text-indigo-300 border border-indigo-500/20 px-3 py-1 rounded-lg text-xs font-medium">
                           {skill}
                         </span>
                       ))}
                     </div>
 
-                    {/* "Why This Match?" Section */}
-                    <div className="mt-4 bg-slate-50 p-3.5 rounded-lg border border-slate-100">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-900 mb-1">
-                        <Sparkles size={14} className="text-indigo-600" />
-                        Why this match?
+                    {/* Why This Match Explanation */}
+                    <div className="mt-5 bg-slate-950/80 p-4 rounded-xl border border-slate-800/80">
+                      <div className="flex items-center gap-2 text-xs font-bold text-indigo-400 mb-1.5">
+                        <Sparkles size={14} /> Why this match?
                       </div>
-                      <p className="text-xs text-slate-600 leading-relaxed">
+                      <p className="text-xs text-slate-400 leading-relaxed">
                         {match.explanation}
                       </p>
                     </div>
 
-                    {/* Connect Button Section */}
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-slate-100">
-                      <span className="text-xs text-slate-500">
-                        Interested in collaborating?
-                      </span>
-                      
-                      <a
-                        href={
-                          match.contact.includes('@') 
-                            ? `mailto:${match.contact}?subject=GiveBack Match: ${encodeURIComponent(match.description)}` 
-                            : match.contact.startsWith('http') 
-                              ? match.contact 
-                              : `https://github.com/${match.contact.replace('@', '')}`
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition flex items-center gap-1.5 shadow-sm"
-                      >
-                        <Mail size={14} /> Connect ({match.contact})
-                      </a>
+                    {/* Improved Contact Bar */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-5 pt-4 border-t border-slate-800/80">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-400 font-medium">Contact Details:</span>
+                        <code className="bg-slate-950 px-3 py-1 rounded-lg border border-slate-800 text-indigo-300 text-xs font-mono select-all">
+                          {match.contact}
+                        </code>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => copyToClipboard(match.contact, match.id)}
+                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition flex items-center gap-1.5 shadow-sm active:scale-95"
+                        >
+                          {copiedId === match.id ? (
+                            <>
+                              <CheckCircle2 size={14} className="text-emerald-400" /> Copied!
+                            </>
+                          ) : (
+                            <>
+                              <Copy size={14} /> Copy Contact
+                            </>
+                          )}
+                        </button>
+
+                        {match.contact.includes('@') && (
+                          <a
+                            href={`mailto:${match.contact}?subject=GiveBack Match: ${encodeURIComponent(match.description)}`}
+                            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
+                          >
+                            <Mail size={14} /> Open Mail
+                          </a>
+                        )}
+                      </div>
                     </div>
+
                   </div>
                 ))}
               </div>
             )}
           </div>
         )}
+
       </main>
     </div>
   );
