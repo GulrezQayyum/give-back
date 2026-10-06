@@ -7,7 +7,7 @@
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React%20%2B%20Vite-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
-[![DEV Community Challenge](https://img.shields.io/badge/🏆%20DEV%20COMMUNITY-CHALLENGE-0A0A0A?style=flat-square)](https://dev.to/)
+[![DEV Community Challenge](https://img.shields.io/badge/DEV%20COMMUNITY-CHALLENGE-00A8CC?style=flat-square&labelColor=4B4B4B)](https://dev.to/)
 ---
 
 ## Challenge Submission
